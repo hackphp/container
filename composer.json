@@ -1,0 +1,32 @@
+{
+    "name": "hackphp/container",
+    "description": "HackPHP PSR-11 compatible container",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Mohamed Samir",
+            "email": "gm.mohamedsamir@gmail.com"
+        }
+    ],
+    "require": {
+        "psr/container": "2.0.x-dev"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "9.5.x-dev"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Hackphp\\Container\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Hackphp\\Tests\\Container\\": "tests/"
+        }
+    },
+    "minimum-stability": "dev",
+    "scripts": {
+        "test": "./vendor/bin/phpunit --do-not-cache-result"
+    }
+}
