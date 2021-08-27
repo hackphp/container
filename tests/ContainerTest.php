@@ -146,6 +146,9 @@ class ContainerTest extends TestCase
         $container = Container::getInstance();
 
         $this->expectErrorMessage("Circular dependency.");
+        $container->make(Test::class);
+
+        $this->expectErrorMessage("Circular dependency.");
         $container->make(A::class);
     }
 }
