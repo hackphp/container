@@ -12,6 +12,13 @@ use Hackphp\Container\Exceptions\BindingException;
 trait Resolver
 {
     /**
+     * Build stack to detect cirular dependency.
+     *
+     * @var array
+     */
+    private array $buildStack = [];
+
+    /**
      * Resolve the entry.
      *
      * @param  string $name
@@ -72,7 +79,7 @@ trait Resolver
      * @param  string $entry
      * @return object
      */
-    protected function autowire($entry)
+    protected function autowire(string $entry)
     {
         try {
             $reflector = new ReflectionClass($entry);
@@ -90,9 +97,18 @@ trait Resolver
             return new $entry;
         }
 
+        // To Detect the circular dependency
+        if (in_array($entry, $this->buildStack)) {
+            throw new BindingException("Circular dependency.");
+        }
+
+        $this->buildStack[] = $entry;
+
         $instances = $this->resolveDependencies(
             $constructor->getParameters()
         );
+
+        array_pop($this->buildStack);
 
         return $reflector->newInstanceArgs($instances);
     }
@@ -113,35 +129,15 @@ trait Resolver
             $declaringClass = $dependency->getDeclaringClass()->getName();
 
             if ($type->isBuiltin() || !$type instanceof ReflectionNamedType) {
-                throw new BindingException("Unresolvable dependency: resolving [$dependency] in class {$declaringClass}");
-            }
-
-            if ($this->isCircularDependency($declaringClass, $type)) {
-                throw new BindingException("Circular dependency.");
+                throw new BindingException(
+                    "Unresolvable dependency: resolving [$dependency] in class {$declaringClass}"
+                );
             }
 
             $results[] = $this->resolve($type->getName());
         }
 
         return $results;
-    }
-
-    /**
-     * Check if there exists circular dependency.
-     *
-     * @param  string $declaringClass
-     * @param  ReflectionNamedType $type
-     * @return bool
-     */
-    protected function isCircularDependency(string $declaringClass, ReflectionNamedType $type)
-    {
-        if ($declaringClass == $type->getName()) {
-            return true;
-        }
-
-        $autowire = new Autowire($type->getName());
-
-        return $autowire->constructHasType($declaringClass);
     }
 
     /**

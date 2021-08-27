@@ -193,6 +193,13 @@ class A
 
 class B
 {
+    public function __construct(C $a)
+    {
+    }
+}
+
+class C
+{
     public function __construct(A $a)
     {
     }
